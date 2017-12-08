@@ -7,8 +7,9 @@ const { loadCategories } = require('../domains/category')
 
 let CACHE_DATA = {
   articles: null,
+  categories: null,
 }
-let CACHE_REVISION = null
+let CACHE_REVISION = 0
 
 const WARNING_FILE_NAME = '.warning.json'
 
@@ -17,6 +18,9 @@ async function getCurrentRevision() {
   const paths = (await fs.readdir(DIR))
     .filter((f) => f !== WARNING_FILE_NAME)
     .map((f) => pa.join(DIR, f))
+  if (paths.length === 0) {
+    return (new Date()).getTime()
+  }
   const mtimes = (await Promise.all(paths.map((p) => fs.stat(p))))
     .map((s) => s.mtime.getTime())
   return mtimes.reduce((prev, cur) => prev > cur ? prev : cur)

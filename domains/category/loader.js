@@ -11,11 +11,11 @@ const META_FILENAME = '.meta.json'
 const NG_FIELDS = ['slug']
 
 const J = pa.join.bind(pa)
-const BASE = config.ARTICLES_DIR
+const BASE_DIR = config.ARTICLES_DIR
 
 async function loadCategory(slug) {
   const category = new Category(slug, slug)
-  const path = J(BASE, slug, META_FILENAME)
+  const path = J(BASE_DIR, slug, META_FILENAME)
 
   if (!fs.existsSync(path)) {
     return { category, warning: null }
@@ -45,15 +45,10 @@ async function loadCategory(slug) {
 }
 
 async function loadCategories() {
-  if (!fs.existsSync(BASE)) {
-    await fs.mkdir(BASE)
-    return []
-  }
-
-  const baseFilenames = await fs.readdir(BASE)
+  const baseFilenames = await fs.readdir(BASE_DIR)
 
   const categortSlugs = (await Promise.all(baseFilenames.map(slug => {
-    return fs.stat(J(BASE, slug)).then((stat) => ({stat, slug}))
+    return fs.stat(J(BASE_DIR, slug)).then((stat) => ({stat, slug}))
   })))
     .filter((v) => v.stat.isDirectory())
     .map((v) => v.slug)

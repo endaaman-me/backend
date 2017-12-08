@@ -33,7 +33,7 @@ router.post('/', async (ctx, next) => {
   try {
     await article.create()
   } catch (e) {
-    ctx.throw(400, e)
+    ctx.throw(400, e.message)
     return
   }
   ctx.body = await getArticleBySlug(article.slug)
@@ -61,7 +61,7 @@ router.patch('/:slug*', async (ctx, next) => {
   try {
     await article.update(slug)
   } catch (e) {
-    ctx.throw(400, e)
+    ctx.throw(400, e.message)
     return
   }
 

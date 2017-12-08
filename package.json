@@ -4,6 +4,7 @@
     "@koa/cors": "^2.2.1",
     "async-busboy": "^0.6.2",
     "bcrypt": "^1.0.3",
+    "dotenv": "^4.0.0",
     "fecha": "^2.3.2",
     "fs-cp": "^1.4.0",
     "fs-extra": "^4.0.2",
@@ -21,7 +22,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "watch": "nodemon --watch ./ index.js --ignore node_modules/"
+    "watch": "nodemon --watch ./ --watch index.js --ignore node_modules/"
   },
   "devDependencies": {
     "nodemon": "^1.12.1"

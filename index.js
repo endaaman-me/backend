@@ -7,11 +7,12 @@ const koaServe = require('koa-static')
 const koaCors = require('@koa/cors');
 
 const config = require('./config')
+const bootstrapMiddleware = require('./middlewares/bootstrap')
 const tokenByHeaderMiddleware = require('./middlewares/token-by-header')
 const tokenByCookieMiddleware = require('./middlewares/token-by-cookie')
 const loggerMiddleware = require('./middlewares/logger')
 const authMiddleware = require('./middlewares/auth')
-const authStaticMiddleware = require('./middlewares/auht-static')
+const authStaticMiddleware = require('./middlewares/auth-static')
 const sessionRouter = require('./endpoints/session')
 const articleRouter = require('./endpoints/article')
 const categoryRouter = require('./endpoints/category')
@@ -32,6 +33,7 @@ const apiApp = new Koa()
 apiApp.context.token = null
 apiApp.context.authorized = false
 apiApp
+  .use(bootstrapMiddleware)
   .use(koaJson({pretty: false, param: 'pretty'}))
   .use(koaCors({
     origin: ['*'],
@@ -50,6 +52,7 @@ const staticApp = new Koa()
 staticApp.context.token = null
 staticApp.context.authorized = false
 staticApp
+  .use(bootstrapMiddleware)
   .use(tokenByCookieMiddleware)
   .use(authMiddleware)
   .use(authStaticMiddleware)

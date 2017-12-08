@@ -3,7 +3,9 @@ const config = require('../config')
 module.exports = async (ctx, next) => {
   // ctx.body = 'hi'
   const splitted = ctx.path.split('/')
-  if (ctx.path.startsWith('/' + config.PRIVATE_DIR_NAME)) {
+  if (config.PROTECTED_DIR_NAMES.some(dir => {
+    return ctx.path.startsWith('/' + dir)
+  })) {
     if (ctx.authorized) {
       await next()
     } else {

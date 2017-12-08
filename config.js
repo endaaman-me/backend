@@ -1,22 +1,28 @@
-const path = require('path')
+const pa = require('path')
 const bcrypt = require('bcrypt')
-const crypto = require('crypto')
+const dotenv = require('dotenv')
 
+dotenv.config()
 
-const SHARED_DIR = process.env.ENDAAMAN_SHARED_DIR || path.join(process.cwd(), 'shared')
-const ARTICLES_DIR = path.join(SHARED_DIR, 'articles')
+if (!process.env.ENDAAMAN_SECRET_KEY_BAE) {
+  throw new Error('You need to setup .env')
+  return
+}
 
-const PRIVATE_DIR_NAME = 'private'
-const PRIVATE_DIR = path.join(SHARED_DIR, PRIVATE_DIR_NAME)
+const PASSWORD_HASH = process.env.ENDAAMAN_PASSWORD_HASH
+const SECRET_KEY_BASE = process.env.ENDAAMAN_SECRET_KEY_BAE
 
-const PASSWORD_HASH = process.env.ENDAAMAN_PASSWORD || bcrypt.hashSync('hogehoge', bcrypt.genSaltSync(10))
-const SECRET_KEY_BASE = process.env.SECRET_KEY_BASE || crypto.randomBytes(48).toString('hex')
+const SHARED_DIR = pa.resolve(process.env.ENDAAMAN_SHARED_DIR)
+const ARTICLES_DIR = pa.join(SHARED_DIR, 'articles')
+const PRIVATE_DIR = pa.join(SHARED_DIR, 'private')
+const PROTECTED_DIR_NAMES = ['articles', 'private']
 
 module.exports = {
+  PASSWORD_HASH,
+  SECRET_KEY_BASE,
+
   SHARED_DIR,
-  PRIVATE_DIR_NAME,
   PRIVATE_DIR,
   ARTICLES_DIR,
-  PASSWORD_HASH,
-  SECRET_KEY_BASE
+  PROTECTED_DIR_NAMES,
 }

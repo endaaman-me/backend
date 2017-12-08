@@ -9,6 +9,7 @@ const { Article } = require('./model')
 
 const MARKDONW_FILE_REG = /^.+\.md$/
 const NG_FIELDS = ['slug', 'content']
+const BASE_DIR = config.ARTICLES_DIR
 
 const J = pa.join.bind(pa)
 
@@ -75,7 +76,7 @@ function parseMetaText(metaText) {
 }
 
 async function loadArticle(relative) {
-  const filepath = J(config.ARTICLES_DIR, relative)
+  const filepath = J(BASE_DIR, relative)
 
   const stat = await fs.stat(filepath)
 
@@ -110,16 +111,10 @@ async function loadArticle(relative) {
 }
 
 async function loadArticles() {
-  const BASE = config.ARTICLES_DIR
-  if (!fs.existsSync(BASE)) {
-    await fs.mkdir(BASE)
-    return []
-  }
-
-  const baseFilenames = await fs.readdir(BASE)
+  const baseFilenames = await fs.readdir(BASE_DIR)
 
   const categortSlugs = (await Promise.all(baseFilenames.map(slug => {
-    return fs.stat(J(BASE, slug)).then((stat) => ({stat, slug}))
+    return fs.stat(J(BASE_DIR, slug)).then((stat) => ({stat, slug}))
   })))
     .filter((v) => v.stat.isDirectory())
     .map((v) => v.slug)
@@ -132,7 +127,7 @@ async function loadArticles() {
     })
 
   for (const categorySlug of categortSlugs) {
-    (await fs.readdir(J(BASE, categorySlug)))
+    (await fs.readdir(J(BASE_DIR, categorySlug)))
       .filter(name => MARKDONW_FILE_REG.test(name))
       .forEach((name) => {
         wg.push(loadArticle(J(categorySlug, name)))
