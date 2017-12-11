@@ -71,8 +71,20 @@ class Article {
     return this[FIELD_ERROR]
   }
 
+  isPublic() {
+    return this.visiblity === Visiblity.PUBLIC
+  }
+
+  isHidden() {
+    return this.visiblity === Visiblity.HIDDEN
+  }
+
   isSecret() {
     return this.visiblity === Visiblity.SECRET
+  }
+
+  isPrivate() {
+    return this.visiblity === Visiblity.PRIVATE
   }
 
   constructor(slug, content) {

@@ -9,11 +9,15 @@ const router = new Router()
 
 router.get('/', async (ctx, next) => {
   const allArticles = await getArticles()
-  if (ctx.authorized) {
-    ctx.body = allArticles
-    return
-  }
-  ctx.body = allArticles.filter((a) => !a.isSecret())
+
+  const articles = ctx.authorized
+    ? allArticles
+    : allArticles.filter((a) => !a.isPrivate())
+
+  articles.sort((a, b) => {
+    return (new Date(b.date)).getTime() - (new Date(a.date)).getTime()
+  })
+  ctx.body = articles
 })
 
 router.post('/', async (ctx, next) => {
