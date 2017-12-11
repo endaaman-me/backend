@@ -18,14 +18,15 @@ async function checkDir(dir) {
   }
 }
 
-async function getFiles(dirSlug) {
+
+async function listDir(dirSlug) {
   const dir = J(BASE_DIR, dirSlug)
   await checkDir(dir)
 
   results = []
   const names = await fs.readdir(dir)
   for (const name of names) {
-    const stat = await fs.stat(dir)
+    const stat = await fs.stat(J(dir, name))
     const data = {
       name,
       size: stat.size,
@@ -34,6 +35,13 @@ async function getFiles(dirSlug) {
     }
     results.push(data)
   }
+
+  results.sort((a, b) => {
+    if (a.is_dir ^ b.is_dir) {
+      return a.is_dir ? -1 : 1
+    }
+    return a.name.localeCompare(b.name)
+  })
   return results
 }
 
@@ -93,25 +101,13 @@ async function moveFile(slug, destSlug) {
   if (fs.existsSync(destPath)) {
     throw new Error(`dest path(${destPath}) already exists`)
   }
-
-  const destDir = pa.dirname(destPath)
-  if (!fs.existsSync(destDir)) {
-    throw new Error(`dest dir(${destDir}) does not exist`)
-    return
-  }
-
-  const destDirStat = await fs.stat(destDir)
-  if (!destDirStat.isDirectory()) {
-    throw new Error(`file already exists in dest dir(${destDir}) name`)
-    return
-  }
-
+  await checkDir(destPath)
   await fs.rename(path, destPath)
 }
 
 
 module.exports = {
-  getFiles,
+  listDir,
   saveFiles,
   deleteFile,
   moveFile,

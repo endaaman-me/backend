@@ -4,7 +4,7 @@ const koaJson = require('koa-json')
 const koaBody = require('koa-bodyparser')
 const koaLogger = require('koa-logger')
 const koaServe = require('koa-static')
-const koaCors = require('@koa/cors');
+const koaCors = require('@koa/cors')
 
 const config = require('./config')
 const bootstrapMiddleware = require('./middlewares/bootstrap')
