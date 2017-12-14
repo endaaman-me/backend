@@ -81,11 +81,12 @@ async function deleteFile(slug) {
   }
 
   if (stat.isDirectory()) {
-    const files = await fs.readdir(p)
+    const files = await fs.readdir(path)
     if (files.length > 0) {
       throw new Error(`${path} is not empty directory`);
     }
     await fs.rmdir(path)
+    return
   }
 
   throw new Error(`${path} is not file nor directory`);

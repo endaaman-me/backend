@@ -34,7 +34,7 @@ router.post('/:dir*', async (ctx, next) => {
 
 router.delete('/:path*', async (ctx, next) => {
   try {
-    await unlink(ctx.params.path || '')
+    await deleteFile(ctx.params.path || '')
   } catch (e) {
     ctx.throw(400, e.message)
     return
