@@ -21,6 +21,7 @@ router.get('/:path*', async (ctx, next) => {
 })
 
 router.post('/:dir*', async (ctx, next) => {
+  console.log(ctx.req)
   const { files, fields } = await busboy(ctx.req)
 
   try {
