@@ -1,8 +1,9 @@
 const Router = require('koa-router')
 const Joi = require('joi')
 const config = require('../config')
-const { Article } = require('../domains/article')
-const { getArticles, getArticleBySlug } = require('../handlers/getter')
+const { wrapp } = require('../lib')
+const { Article, validateArticle } = require('../domains/article')
+const { saveArticle, getArticles, getArticleBySlug } = require('../applications/handler')
 
 
 const router = new Router()
@@ -21,22 +22,17 @@ router.get('/', async (ctx, next) => {
 })
 
 router.post('/', async (ctx, next) => {
-  const req = ctx.request.body
+  let err
 
-  const article = new Article(req.slug || '', req.content)
-
-  article.extend(req)
-  article.validate()
-
-  if (article.getError()) {
-    ctx.body = article.getError()
-    ctx.status = 400
+  const article = new Article(ctx.request.body)
+  err = validateArticle(article)
+  if (err) {
+    ctx.throw(400, err.message)
     return
   }
 
-  try {
-    await article.create()
-  } catch (e) {
+  [ err ] = await saveArticle(article)
+  if (err) {
     ctx.throw(400, e.message)
     return
   }
@@ -45,27 +41,24 @@ router.post('/', async (ctx, next) => {
 })
 
 router.patch('/:slug*', async (ctx, next) => {
-  const req = ctx.request.body
+  let err
   const { slug } = ctx.params
   const article = await getArticleBySlug(slug)
-
   if (!article) {
     ctx.throw(404)
     return
   }
 
-  article.extend(req)
-
-  if (!article.validate()) {
-    ctx.body = article.getError()
-    ctx.status = 400
+  article.extend(ctx.request.body)
+  err = validateArticle(article)
+  if (err) {
+    ctx.throw(400, err.message)
     return
   }
 
-  try {
-    await article.update(slug)
-  } catch (e) {
-    ctx.throw(400, e.message)
+  [ err ] = await saveArticle(article)
+  if (err) {
+    ctx.throw(400, err.message)
     return
   }
 
@@ -74,7 +67,7 @@ router.patch('/:slug*', async (ctx, next) => {
 })
 
 router.delete('/:slug*', async (ctx, next) => {
-  const req = ctx.request.body
+  let err
   const { slug } = ctx.params
   const article = await getArticleBySlug(slug)
 
@@ -83,7 +76,11 @@ router.delete('/:slug*', async (ctx, next) => {
     return
   }
 
-  await article.delete()
+  [ err ] = await deleteArticle(article)
+  if (err) {
+    ctx.throw(400, err.message)
+    return
+  }
   ctx.status = 204
 })
 

@@ -3,7 +3,7 @@ const fs = require('fs-extra')
 const busboy = require('async-busboy')
 const Router = require('koa-router')
 const config = require('../config')
-const { listDir, saveFiles, deleteFile, moveFile } = require('../handlers/file')
+const { listDir, saveFiles, deleteFile, moveFile } = require('../applications/file')
 
 
 const router = new Router()

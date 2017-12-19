@@ -1,7 +1,9 @@
 const {
   upgradeCache,
   getCache,
-} = require('../services/cache')
+} = require('../infrascructures/cache')
+
+const { articleRepository } = require('../domains/article')
 
 
 async function getArticles() {

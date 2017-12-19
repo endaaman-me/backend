@@ -2,7 +2,7 @@ const Router = require('koa-router')
 const Joi = require('joi')
 const config = require('../config')
 const { Category } = require('../domains/category')
-const { getCategories } = require('../handlers/getter')
+const { getCategories } = require('../applications/handler')
 
 
 const router = new Router()

@@ -23,8 +23,6 @@ const META_DELIMITTER = '---'
 
 const FIELD_ERROR = Symbol()
 
-const REG_SLUG = /^(?:[a-z0-9-_]+|(?:[a-z0-9-_]+\/[a-z0-9-_]+))$/
-
 const META_FIELDS = [
   {
     key: 'aliases',
@@ -67,77 +65,41 @@ class Article {
     return META_DELIMITTER
   }
 
-  getError() {
-    return this[FIELD_ERROR]
-  }
-
   isPublic() {
-    return this.visiblity === Visiblity.PUBLIC
+    return this.visiblity !== Visiblity.PRIVATE
   }
 
-  isHidden() {
-    return this.visiblity === Visiblity.HIDDEN
-  }
-
-  isSecret() {
-    return this.visiblity === Visiblity.SECRET
-  }
-
-  isPrivate() {
-    return this.visiblity === Visiblity.PRIVATE
-  }
-
-  constructor(slug, content) {
-    this.slug = slug
-    this.content = content
-
-    const sp = slug.split('/')
-    this.aliases = []
-    this.title = sp[sp.length-1]
-    this.image = ''
-    this.digest = ''
-    this.tags = []
-    this.priority = 0
-    this.visiblity = Article.Visiblity.PUBLIC
-
+  constructor(obj) {
+    const result = Joi.validate(obj, Joi.object({
+      slug: Joi.string().regex(REG_SLUG).required(''),
+      content: Joi.string().allow(''),
+    })
     const d = new Date()
+    const sp = slug.split('/')
+    const value = {
+      obj.slug,
+      obj.content,
+      aliases: []
+      title: sp[sp.length-1]
+      image: ''
+      digest: ''
+      tags: []
+      priority: 0
+      visiblity: Article.Visiblity.PUBLIC,
+      date: fecha.format(d, 'YYYY-MM-DD'),
+      ...obj,
+    }
+    this.isSlugChanged = false
     this.created_at = d
     this.updated_at = d
-    this.date = fecha.format(d, 'YYYY-MM-DD')
   }
 
   extend(obj) {
-    return Object.assign(this, obj)
+    const oldSlug = this.value.slug
+    this.isSlugChanged = true
+    Object.assign(this.value, obj)
   }
 
-  copy() {
-    return (new Article(this.slug, this.content)).extend(this)
-  }
-
-  validate() {
-    const result = Joi.validate(this, Joi.object({
-      slug: Joi.string().regex(REG_SLUG),
-      aliases: Joi.array().items(Joi.string()),
-      title: Joi.string(),
-      digest: Joi.string().allow(''),
-      image: Joi.string().allow(''),
-      tags: Joi.array().items(Joi.string()),
-      content: Joi.string(),
-      priority: Joi.number().min(0).integer(),
-      visiblity: Joi.string().allow(Object.values(Article.Visiblity)),
-      date : Joi.date(),
-      created_at : Joi.date(),
-      updated_at : Joi.date(),
-    }))
-
-    if (result.error) {
-      this[FIELD_ERROR] = result.error
-      return false
-    } else {
-      this[FIELD_ERROR] = null
-      return true
-    }
-  }
 
   toText() {
     let hasMetaField = false
@@ -204,5 +166,5 @@ class Article {
 }
 
 module.exports = {
-  Article
+  Article,
 }

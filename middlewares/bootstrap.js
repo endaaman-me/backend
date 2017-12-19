@@ -1,4 +1,4 @@
-const { bootstrap } = require('../handlers/bootstrap')
+const { bootstrap } = require('../applications/handler')
 
 module.exports = async (ctx, next) => {
   await bootstrap()
