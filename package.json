@@ -4,6 +4,7 @@
     "@koa/cors": "^2.2.1",
     "async-busboy": "^0.6.2",
     "bcrypt": "^1.0.3",
+    "datejs": "^1.0.0-rc3",
     "dotenv": "^4.0.0",
     "fecha": "^2.3.2",
     "fs-cp": "^1.4.0",

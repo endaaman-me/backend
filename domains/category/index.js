@@ -1,7 +1,12 @@
-const model = require('./model')
-const loader = require('./loader')
+const { Category } = require('./model')
+const { findAll } = require('./repository')
+
+
+async function findAllCategories() {
+  return await findAll()
+}
 
 module.exports = {
-  ...model,
-  ...loader,
+  Category,
+  findAllCategories,
 }

@@ -2,30 +2,35 @@ const pa = require('path')
 const fs = require('fs-extra')
 const fecha = require('fecha')
 const yaml = require('js-yaml')
-const Joi = require('joi')
-const config = require('../../config')
-const { Article } = require('./model')
+
+const { ARTICLES_DIR } = require('../../../config')
+const { Article } = require('../model')
+const { setWarningsByKey } = require('../../../infras/warning')
+const { META_DELIMITTER } = require('../constant')
 
 
 const MARKDONW_FILE_REG = /^.+\.md$/
 const NG_FIELDS = ['slug', 'content']
-const BASE_DIR = config.ARTICLES_DIR
-
+const BASE_DIR = ARTICLES_DIR
 const J = pa.join.bind(pa)
+
+function isMd(name) {
+  return MARKDONW_FILE_REG.test(name)
+}
 
 function trimExtension(s) {
   const i = s.lastIndexOf('.')
   return i < 0 ? s : s.substr(0, i)
 }
 
-
 function splitArticleText(wholeText) {
   const lines = wholeText.split('\n')
-  let count = 0
   const metaLines = []
   const contentLines = []
+
+  let count = 0
   for (const line of lines) {
-    if (line === Article.META_DELIMITTER) {
+    if (line === META_DELIMITTER) {
       count += 1
       continue
     }
@@ -75,14 +80,13 @@ function parseMetaText(metaText) {
   }
 }
 
-async function loadArticle(relative) {
+async function readOne(relative) {
+  let err
   const filepath = J(BASE_DIR, relative)
+  const splitted = relative.split('/')
+  const slug = trimExtension(relative)
 
   const stat = await fs.stat(filepath)
-
-  const splitted = relative.split('/')
-
-  const slug = trimExtension(relative)
   const wholeText = await fs.readFile(filepath, 'utf-8')
   const {
     metaText,
@@ -91,26 +95,34 @@ async function loadArticle(relative) {
 
   let { meta, warning } = parseMetaText(metaText)
 
-  const article = new Article(slug, contentText)
-
   if (NG_FIELDS.some((k) => k in meta)) {
-    return { article, warning: `${JSON.stringify(NG_FIELDS)} is defined in meta` }
+    meta = {}
+    warning = `You must not define ${JSON.stringify(NG_FIELDS)} in meta`
   }
 
-  article.extend({
+  const base =  {
+    slug,
+    content: contentText,
     date: fecha.format(stat.mtime, 'YYYY-MM-DD'),
-    created_at: stat.birthtime,
-    updated_at: stat.mtime,
+  }
+
+  let article
+  article = new Article({
+    ...base,
+    ...meta,
   })
 
-  const testArticle = article.copy().extend(meta)
-  if (!testArticle.validate()) {
-    return { article, warning: testArticle.getError() }
+  err = article.validate()
+  if (err) {
+    article = new Article(base)
+    warning = err.message
   }
-  return { article: testArticle, warning: null }
+  article.bless(stat.birthtime, stat.mtime)
+
+  return { article, warning}
 }
 
-async function loadArticles() {
+async function readAll() {
   const baseFilenames = await fs.readdir(BASE_DIR)
 
   const categortSlugs = (await Promise.all(baseFilenames.map(slug => {
@@ -120,36 +132,35 @@ async function loadArticles() {
     .map((v) => v.slug)
 
   const wg = []
-  baseFilenames
-    .filter(name => MARKDONW_FILE_REG.test(name))
-    .forEach((v) => {
-      wg.push(loadArticle(v, null))
-    })
+  for (const v of baseFilenames.filter(isMd)) {
+    wg.push(readOne(v, null))
+  }
 
   for (const categorySlug of categortSlugs) {
-    (await fs.readdir(J(BASE_DIR, categorySlug)))
-      .filter(name => MARKDONW_FILE_REG.test(name))
-      .forEach((name) => {
-        wg.push(loadArticle(J(categorySlug, name)))
-      })
+    const filenames = (await fs.readdir(J(BASE_DIR, categorySlug))).filter(isMd)
+    for (const name of filenames) {
+      wg.push(readOne(J(categorySlug, name)))
+    }
   }
   const results = await Promise.all(wg)
 
   const articles = []
   const warnings = []
-  results.forEach((result) => {
+  for (const result of results) {
     if (result.warning) {
       warnings.push({
-        slug: result.article.slug,
-        warning: result.warning,
+        title: result.article.getSlug(),
+        message: result.warning,
       })
     }
     articles.push(result.article)
-  })
+  }
 
-  return { articles, warnings }
+  await setWarningsByKey('articles', warnings)
+
+  return articles
 }
 
 module.exports = {
-  loadArticles
+  readAll,
 }

@@ -13,7 +13,7 @@ const NG_FIELDS = ['slug']
 const J = pa.join.bind(pa)
 const BASE_DIR = config.ARTICLES_DIR
 
-async function loadCategory(slug) {
+async function readOne(slug) {
   const category = new Category(slug, slug)
   const path = J(BASE_DIR, slug, META_FILENAME)
 
@@ -44,7 +44,7 @@ async function loadCategory(slug) {
   }
 }
 
-async function loadCategories() {
+async function readAll() {
   const baseFilenames = await fs.readdir(BASE_DIR)
 
   const categortSlugs = (await Promise.all(baseFilenames.map(slug => {

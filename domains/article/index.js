@@ -1,28 +1,29 @@
 const { Article } = require('./model')
-const { store, remove, find, findOne } = require('./repository')
-const { validate } = require('./spec')
+const { store, drop, findAll, find } = require('./repository')
+const constant = require('./constant')
 
-async function saveArticle(article) {
+
+async function storeArticle(article) {
   await store(article)
 }
 
-async function deleteArticle(article) {
-  await remove(article)
+async function dropArticle(article) {
+  await drop(article)
 }
 
-async function validateArticle(article) {
-  return validate(article)
+async function findAllArticles() {
+  return await findAll()
 }
 
-
-async function validateArticle(article) {
+async function findArticleBySlug(slug) {
+  return await find((a) => slug === a.getSlug())
 }
 
 module.exports = {
   Article,
-  saveArticle,
-  deleteArticle,
-  getArticles,
-  getPublicArticles,
-  getArticleBySlug,
+  storeArticle,
+  dropArticle,
+  findAllArticles,
+  findArticleBySlug,
+  ...constant,
 }

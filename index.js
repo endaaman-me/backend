@@ -13,21 +13,8 @@ const tokenByCookieMiddleware = require('./middlewares/token-by-cookie')
 const loggerMiddleware = require('./middlewares/logger')
 const authMiddleware = require('./middlewares/auth')
 const authStaticMiddleware = require('./middlewares/auth-static')
-const sessionRouter = require('./endpoints/session')
-const articleRouter = require('./endpoints/article')
-const categoryRouter = require('./endpoints/category')
-const fileRouter = require('./endpoints/file')
+const apiRouter = require('./endpoints')
 
-
-const apiRouter = new KoaRouter()
-apiRouter
-  .use('/sessions', sessionRouter.routes(), sessionRouter.allowedMethods())
-  .use('/articles', articleRouter.routes(), articleRouter.allowedMethods())
-  .use('/categories', categoryRouter.routes(), categoryRouter.allowedMethods())
-  .use('/files', fileRouter.routes(), fileRouter.allowedMethods())
-  .get('/', (ctx) => {
-    ctx.body = { message: 'Hi, this is endaaman\' api server' }
-  })
 
 const apiApp = new Koa()
 apiApp.context.token = null

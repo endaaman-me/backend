@@ -2,56 +2,32 @@ const pa = require('path')
 const fs = require('fs-extra')
 const busboy = require('async-busboy')
 const Router = require('koa-router')
-const config = require('../config')
-const { listDir, saveFiles, deleteFile, moveFile } = require('../applications/file')
+
+const { listDir, saveFiles, deleteFile, moveFile } = require('../domains/file')
 
 
 const router = new Router()
 const J = pa.join.bind(pa)
 
 router.get('/:path*', async (ctx, next) => {
-  let data
-  try {
-    data = await listDir(ctx.params.path || '')
-  } catch (e) {
-    ctx.throw(400, e.message)
-    return
-  }
-  ctx.body = data
+  ctx.body = await listDir(ctx.params.path || '')
 })
 
 router.post('/:dir*', async (ctx, next) => {
-  console.log(ctx.req)
   const { files, fields } = await busboy(ctx.req)
 
-  try {
-    await saveFiles(ctx.params.dir || '', files)
-  } catch (e) {
-    ctx.throw(400, e.message)
-    return
-  }
+  await saveFiles(ctx.params.dir || '', files)
   ctx.status = 201
 })
 
 router.delete('/:path*', async (ctx, next) => {
-  try {
-    await deleteFile(ctx.params.path || '')
-  } catch (e) {
-    ctx.throw(400, e.message)
-    return
-  }
-
+  await deleteFile(ctx.params.path || '')
   ctx.status = 204
 })
 
 
 router.patch('/:path*', async (ctx, next) => {
-  try {
-    await moveFile(ctx.params.path || '', ctx.request.body.dest || '')
-  } catch (e) {
-    ctx.throw(400, e.message)
-    return
-  }
+  await moveFile(ctx.params.path || '', ctx.request.body.dest || '')
   ctx.status = 204
 })
 

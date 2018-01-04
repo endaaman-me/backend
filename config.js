@@ -17,6 +17,9 @@ const ARTICLES_DIR = pa.join(SHARED_DIR, 'articles')
 const PRIVATE_DIR = pa.join(SHARED_DIR, 'private')
 const PROTECTED_DIR_NAMES = ['articles', 'private']
 
+const WARNING_FILE_NAME = '.warning.json'
+const CACHE_IGONRED_FILES = [WARNING_FILE_NAME]
+
 module.exports = {
   PASSWORD_HASH,
   SECRET_KEY_BASE,
@@ -25,4 +28,7 @@ module.exports = {
   PRIVATE_DIR,
   ARTICLES_DIR,
   PROTECTED_DIR_NAMES,
+
+  WARNING_FILE_NAME,
+  CACHE_IGONRED_FILES,
 }
