@@ -1,7 +1,6 @@
 const Router = require('koa-router')
 const Joi = require('joi')
 const config = require('../config')
-const { wr } = require('../helper')
 const {
   Article,
   storeArticle,
@@ -13,11 +12,29 @@ const {
 
 const router = new Router()
 
+
+function combineFilters(filters) {
+  return function(a) {
+    for (const filter of filters) {
+      if (!filter(a)) {
+        return false
+      }
+    }
+    return true
+  }
+}
+
 router.get('/', async (ctx, next) => {
-  const q = ctx.authorized
-    ? null
-    : (a) => a.isPublic()
-  ctx.body = await findAllArticles(q)
+  const filters = []
+  if (!ctx.authorized) {
+    filters.push((a) => a.isPublic())
+  }
+
+  let q
+  if (q = ctx.query.category || ctx.query.cat) {
+    filters.push((a) => a.getCategorySlug() === q)
+  }
+  ctx.body = await findAllArticles(combineFilters(filters))
 })
 
 router.get('/:slug', async (ctx, next) => {
@@ -36,11 +53,7 @@ router.post('/', async (ctx, next) => {
     return
   }
 
-  [ err ] = await wr(storeArticle(article))
-  if (err) {
-    ctx.throw(400, err.message)
-    return
-  }
+  await storeArticle(article)
   ctx.body = await findArticleBySlug(article.getSlug())
   ctx.status = 201
 })
@@ -55,21 +68,14 @@ router.patch('/:slug*', async (ctx, next) => {
     return
   }
 
-  // article.extend(ctx.request.body)
-  article = article.copy()
-  article.extend(ctx.request.body)
+  article = article.extend(ctx.request.body)
   err = article.validate()
   if (err) {
     ctx.throw(400, err.message)
     return
   }
 
-  [ err ] = await wr(storeArticle(article))
-  if (err) {
-    ctx.throw(400, err.message)
-    return
-  }
-
+  await storeArticle(article)
   ctx.body = await findArticleBySlug(article.getSlug())
 })
 
@@ -82,11 +88,7 @@ router.delete('/:slug*', async (ctx, next) => {
     return
   }
 
-  [ err ] = await wr(dropArticle(article))
-  if (err) {
-    ctx.throw(400, err.message)
-    return
-  }
+  await dropArticle(article)
   ctx.status = 204
 })
 

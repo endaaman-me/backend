@@ -1,7 +1,8 @@
 const fecha = require('fecha')
 const yaml = require('js-yaml')
 
-const { META_DELIMITTER, Visiblity } = require('../constant')
+const { Visiblity } = require('../constant')
+const { META_DELIMITTER } = require('../../../config')
 
 function defaultFillFunc(v) {
   return !!v

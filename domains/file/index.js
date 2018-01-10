@@ -18,7 +18,6 @@ async function checkDir(dir) {
   }
 }
 
-
 async function listDir(dirSlug) {
   const dir = J(SHARED_DIR, dirSlug)
   await checkDir(dir)

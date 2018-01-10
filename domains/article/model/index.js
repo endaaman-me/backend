@@ -6,20 +6,30 @@ const yaml = require('js-yaml')
 
 const { SerializableImpl } = require('./serializable')
 const { ValidatableImpl } = require('./validatable')
-const { META_DELIMITTER, Visiblity } = require('../constant')
+const { Visiblity } = require('../constant')
+
+
+function extractCategorySlug(slug) {
+  const splitted = slug.split('/')
+  return splitted.length > 1
+    ? splitted[0]
+    : null
+}
+
+function normalize(diff) {
+  if (diff > 0) {
+    return 1
+  }
+  if (diff < 0) {
+    return -1
+  }
+  return 0
+}
+
 
 class Article {
-  getData() {
-    return this.data
-  }
   getSlug() {
     return this.data.slug
-  }
-  getPriority() {
-    return this.data.priority
-  }
-  getDate() {
-    return new Date(this.data.date)
   }
   isPublic() {
     return this.data.visiblity !== Visiblity.PRIVATE
@@ -29,6 +39,12 @@ class Article {
   }
   getOldSlug() {
     return this._.oldSlug
+  }
+  getCategorySlug() {
+    return extractCategorySlug(this.data.slug)
+  }
+  getOldCategorySlug() {
+    return extractCategorySlug(this._.oldSlug)
   }
   constructor(data) {
     const { slug } = data
@@ -45,42 +61,36 @@ class Article {
     }
     this._ = {
       oldSlug: slug,
-      isDirty: false,
       isNewely: true,
       createdAt: null,
       updatedAt: null,
     }
   }
 
-  copy() {
-    const a = new Article(this.data)
+  extend(payload) {
+    const a = new Article({
+      ...this.data,
+      ...payload,
+    })
     Object.assign(a._, this._)
     return a
   }
 
-  extend(payload) {
-    if (this._.isDirty) {
-      throw new Error('this article is already dirty. Do not extend twice')
-    }
-    Object.assign(this.data, payload)
-    this._.isDirty = true
-  }
-
   bless(updatedAt, createdAt) {
     this._.oldSlug = this.data.slug
-    this._.isDirty = false
     this._.isNewely = false
     this._.createdAt = updatedAt
     this._.updatedAt = createdAt
   }
 
-  compare(a) {
-    // only date
-    const x = this.getDate().getTime() - a.getDate().getTime()
-    if (x !== 0) {
-      return x
+  compare(that) {
+    const a = fecha.format(new Date(this.data.date), 'YYYY-MM-DD')
+    const b = fecha.format(new Date(that.data.date), 'YYYY-MM-DD')
+    let diff = normalize(b.localeCompare(a))
+    if (diff !== 0) {
+      return diff
     }
-    return a.getPriority() - this.getPriority()
+    return that.data.priority - this.data.priority
   }
 }
 

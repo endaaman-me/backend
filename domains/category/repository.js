@@ -1,17 +1,17 @@
-const { getCacheByKey, setCacheByKey, isUpgradeNeeded } = require('../../infras/cache')
+const { getCacheByKey, setCacheByKey, checkUpgradeNeededByKey } = require('../../infras/cache')
 const { write, readAll, removeBySlug } = require('./io')
 const { Category } = require('./model')
 
 
-const CACHE_KEY = Symbol()
+const KEY_CACHE = 'CATEGORIES'
 
 async function upgradeCache() {
-  if (!await isUpgradeNeeded()) {
+  if (!await checkUpgradeNeededByKey(KEY_CACHE)) {
     return
   }
   const items = await readAll()
   items.sort((a, b) => a.compare(b))
-  await setCacheByKey(CACHE_KEY, items)
+  await setCacheByKey(KEY_CACHE, items)
 }
 
 async function store(item) {
@@ -22,11 +22,11 @@ async function drop(item) {
   await removeBySlug(item.getSlug())
 }
 
-async function findAll(func) {
+async function findAll(q) {
   await upgradeCache()
   const items = await getCacheByKey(KEY_CACHE)
-  return func
-    ? items.filter(func)
+  return q
+    ? items.filter(q)
     : items
 }
 

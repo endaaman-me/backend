@@ -23,7 +23,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "watch": "nodemon --watch ./ --watch index.js --ignore node_modules/"
+    "watch": "nodemon --ignore node_modules --ignore shared"
   },
   "devDependencies": {
     "nodemon": "^1.12.1"

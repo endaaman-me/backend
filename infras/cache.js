@@ -4,10 +4,13 @@ const { CACHE_IGONRED_FILES, ARTICLES_DIR }  = require('../config')
 
 
 let CACHE_DATA = {}
-let CACHE_REVISION = 0
+let CACHE_REVISIONS = {}
 
-async function isUpgradeNeeded() {
-  if (!CACHE_REVISION) {
+const J = pa.join.bind(pa)
+
+async function checkUpgradeNeededByKey(key) {
+  const revision = CACHE_REVISIONS[key]
+  if (!revision) {
     return true
   }
 
@@ -15,13 +18,23 @@ async function isUpgradeNeeded() {
 
   const paths = (await fs.readdir(DIR))
     .filter((f) => !CACHE_IGONRED_FILES.includes(f))
-    .map((f) => pa.join(DIR, f))
-    .concat(DIR)
+    .map((f) => J(DIR, f))
+
+  paths.unshift(DIR)
 
   for (const path of paths) {
-    const stat = await fs.stat(path)
-    if (stat.mtime.getTime() > CACHE_REVISION) {
+    const stat  = await fs.stat(path)
+    if (stat.mtime.getTime() > revision) {
       return true
+    }
+    if (stat.isDirectory()) {
+      const paths2 = (await fs.readdir(path)).map((f) => J(path, f))
+      for (const path2 of paths2) {
+        const stat2 = await fs.stat(path2)
+        if (stat2.mtime.getTime() > revision) {
+          return true
+        }
+      }
     }
   }
   return false
@@ -36,11 +49,19 @@ function setCacheByKey(key, data) {
     ...CACHE_DATA,
     [key]: data,
   }
-  CACHE_REVISION = (new Date()).getTime()
+  CACHE_REVISIONS[key] = (new Date()).getTime()
+}
+
+function getCacheData(key) {
+  return {
+    data: CACHE_DATA,
+    revisions: CACHE_REVISIONS,
+  }
 }
 
 module.exports = {
-  isUpgradeNeeded,
+  checkUpgradeNeededByKey,
   getCacheByKey,
   setCacheByKey,
+  getCacheData,
 }

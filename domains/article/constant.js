@@ -1,5 +1,3 @@
-const META_DELIMITTER = '---'
-
 const Visiblity = {
   DEFAULT: 'default', // 公開
   HIDDEN: 'hidden',   // 公開、リンクあり、トップに表示しないだけ
@@ -9,6 +7,5 @@ const Visiblity = {
 }
 
 module.exports = {
-  META_DELIMITTER,
   Visiblity,
 }

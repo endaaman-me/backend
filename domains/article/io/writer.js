@@ -12,6 +12,22 @@ function getArticlePath(slug) {
   return pa.join(ARTICLES_DIR, slug + '.md')
 }
 
+
+async function removeDirIfEmpty(path) {
+  if (!fs.existsSync(path)) {
+    return
+  }
+  const stat = await fs.stat(path)
+  if (!stat.isDirectory()) {
+    return
+  }
+  const files = await fs.readdir(path)
+  if (files.length > 0) {
+    return
+  }
+  await fs.rmdir(path)
+}
+
 async function write(article) {
   const newPath = getArticlePath(article.getSlug())
   const oldPath = getArticlePath(article.getOldSlug())
@@ -35,9 +51,14 @@ async function write(article) {
         return
       }
       await fs.move(oldPath, newPath)
+      const oldCategorySlug = article.getOldCategorySlug()
+      if (oldCategorySlug) {
+        await removeDirIfEmpty(pa.join(ARTICLES_DIR, oldCategorySlug))
+      }
     }
   }
 
+  await fs.ensureFile(newPath) // if category dir is not created
   await fs.writeFile(newPath, article.toText())
 
   const stat = await fs.stat(newPath)
@@ -51,6 +72,10 @@ async function removeBySlug(slug) {
     return
   }
   await fs.unlink(path)
+
+  const splitted = slug.split('/')
+  const categorySlug = splitted[0]
+  await removeDirIfEmpty(pa.join(ARTICLES_DIR, categorySlug))
 }
 
 module.exports = {

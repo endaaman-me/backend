@@ -10,8 +10,10 @@ const miscRouter = require('./misc')
 const router = new KoaRouter()
 router
   .use('/sessions', sessionRouter.routes(), sessionRouter.allowedMethods())
-  .use('/articles', articleRouter.routes(), articleRouter.allowedMethods())
-  .use('/categories', categoryRouter.routes(), categoryRouter.allowedMethods())
+  .use('/aa', articleRouter.routes(), articleRouter.allowedMethods())
+  .redirect('/articles', '/aa')
+  .use('/cc', categoryRouter.routes(), categoryRouter.allowedMethods())
+  .redirect('/categories', '/cc')
   .use('/files', fileRouter.routes(), fileRouter.allowedMethods())
   .use('/misc', miscRouter.routes(), miscRouter.allowedMethods())
   .get('/', (ctx) => {

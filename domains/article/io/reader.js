@@ -3,15 +3,13 @@ const fs = require('fs-extra')
 const fecha = require('fecha')
 const yaml = require('js-yaml')
 
-const { ARTICLES_DIR } = require('../../../config')
+const { ARTICLES_DIR, META_DELIMITTER } = require('../../../config')
 const { Article } = require('../model')
 const { setWarningsByKey } = require('../../../infras/warning')
-const { META_DELIMITTER } = require('../constant')
 
 
 const MARKDONW_FILE_REG = /^.+\.md$/
 const NG_FIELDS = ['slug', 'content']
-const BASE_DIR = ARTICLES_DIR
 const J = pa.join.bind(pa)
 
 function isMd(name) {
@@ -82,7 +80,7 @@ function parseMetaText(metaText) {
 
 async function readOne(relative) {
   let err
-  const filepath = J(BASE_DIR, relative)
+  const filepath = J(ARTICLES_DIR, relative)
   const splitted = relative.split('/')
   const slug = trimExtension(relative)
 
@@ -103,7 +101,7 @@ async function readOne(relative) {
   const base =  {
     slug,
     content: contentText,
-    date: fecha.format(stat.mtime, 'YYYY-MM-DD'),
+    date: fecha.format(stat.birthtime, 'YYYY-MM-DD'),
   }
 
   let article
@@ -119,14 +117,14 @@ async function readOne(relative) {
   }
   article.bless(stat.birthtime, stat.mtime)
 
-  return { article, warning}
+  return { article, warning }
 }
 
 async function readAll() {
-  const baseFilenames = await fs.readdir(BASE_DIR)
+  const baseFilenames = await fs.readdir(ARTICLES_DIR)
 
   const categortSlugs = (await Promise.all(baseFilenames.map(slug => {
-    return fs.stat(J(BASE_DIR, slug)).then((stat) => ({stat, slug}))
+    return fs.stat(J(ARTICLES_DIR, slug)).then((stat) => ({stat, slug}))
   })))
     .filter((v) => v.stat.isDirectory())
     .map((v) => v.slug)
@@ -137,7 +135,7 @@ async function readAll() {
   }
 
   for (const categorySlug of categortSlugs) {
-    const filenames = (await fs.readdir(J(BASE_DIR, categorySlug))).filter(isMd)
+    const filenames = (await fs.readdir(J(ARTICLES_DIR, categorySlug))).filter(isMd)
     for (const name of filenames) {
       wg.push(readOne(J(categorySlug, name)))
     }

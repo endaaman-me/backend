@@ -17,6 +17,9 @@ const ARTICLES_DIR = pa.join(SHARED_DIR, 'articles')
 const PRIVATE_DIR = pa.join(SHARED_DIR, 'private')
 const PROTECTED_DIR_NAMES = ['articles', 'private']
 
+
+const META_DELIMITTER = '---'
+const META_FILENAME = '.meta.json'
 const WARNING_FILE_NAME = '.warning.json'
 const CACHE_IGONRED_FILES = [WARNING_FILE_NAME]
 
@@ -29,6 +32,8 @@ module.exports = {
   ARTICLES_DIR,
   PROTECTED_DIR_NAMES,
 
+  META_DELIMITTER,
+  META_FILENAME,
   WARNING_FILE_NAME,
   CACHE_IGONRED_FILES,
 }

@@ -3,11 +3,10 @@ const fs = require('fs-extra')
 const fecha = require('fecha')
 const yaml = require('js-yaml')
 const Joi = require('joi')
-const config = require('../../config')
+const { META_FILENAME } = require('../../config')
 const { Category } = require('./model')
 
 
-const META_FILENAME = '.meta.json'
 const NG_FIELDS = ['slug']
 
 const J = pa.join.bind(pa)

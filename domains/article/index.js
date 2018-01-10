@@ -11,8 +11,8 @@ async function dropArticle(article) {
   await drop(article)
 }
 
-async function findAllArticles() {
-  return await findAll()
+async function findAllArticles(filter) {
+  return await findAll(filter)
 }
 
 async function findArticleBySlug(slug) {
