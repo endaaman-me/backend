@@ -14,7 +14,7 @@ const ValidatableImpl = {
       title     : Joi.string(),
       digest    : Joi.string().allow(''),
       image     : Joi.string().allow(''),
-      tags      : Joi.array().items(Joi.string()),
+      tags      : Joi.array().items(Joi.string().regex(/^\S+$/)),
       priority  : Joi.number().min(0).integer(),
       visiblity : Joi.string().allow(Object.values(Visiblity)),
       date      : Joi.string().regex(REG_DATE).required(),
