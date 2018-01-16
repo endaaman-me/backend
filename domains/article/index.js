@@ -15,8 +15,8 @@ async function findAllArticles(filter) {
   return await findAll(filter)
 }
 
-async function findArticleBySlug(slug) {
-  return await find((a) => slug === a.getSlug())
+async function findArticleByRelative(relative) {
+  return await find((a) => relative === a.getRelative())
 }
 
 module.exports = {
@@ -24,6 +24,6 @@ module.exports = {
   storeArticle,
   dropArticle,
   findAllArticles,
-  findArticleBySlug,
+  findArticleByRelative,
   ...constant,
 }

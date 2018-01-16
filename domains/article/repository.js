@@ -1,5 +1,5 @@
 const { getCacheByKey, setCacheByKey, checkUpgradeNeededByKey } = require('../../infras/cache')
-const { readAll, write, removeBySlug } = require('./io')
+const { readAll, write, remove } = require('./io')
 const { Article } = require('./model')
 
 
@@ -19,7 +19,7 @@ async function store(item) {
 }
 
 async function drop(item) {
-  await removeBySlug(item.getSlug())
+  await remove(item)
 }
 
 async function findAll(func) {

@@ -6,11 +6,17 @@ const {
   storeArticle,
   dropArticle,
   findAllArticles,
-  findArticleBySlug,
+  findArticleByRelative,
 } = require('../domains/article')
 
 
 const router = new Router()
+
+async function retrieveArticle(ctx) {
+  const { parent, slug } = ctx.params
+  const relative = parent === '-' ? slug : `${parent}/${slug}`
+  return await findArticleByRelative(relative)
+}
 
 
 function combineFilters(filters) {
@@ -37,15 +43,14 @@ router.get('/', async (ctx, next) => {
   ctx.body = await findAllArticles(combineFilters(filters))
 })
 
-router.get('/:slug', async (ctx, next) => {
-  const a = await findArticleBySlug(ctx.params.slug)
+router.get('/:parent/:slug', async (ctx, next) => {
+  const a= await retrieveArticle(ctx)
   ctx.body = a
   ctx.status = a ? 200 : 404
 })
 
 router.post('/', async (ctx, next) => {
   let err
-
   const article = new Article(ctx.request.body)
   err = article.validate()
   if (err) {
@@ -54,15 +59,13 @@ router.post('/', async (ctx, next) => {
   }
 
   await storeArticle(article)
-  ctx.body = await findArticleBySlug(article.getSlug())
+  ctx.body = await findArticleByRelative(article.getRelative())
   ctx.status = 201
 })
 
-router.patch('/:slug*', async (ctx, next) => {
+router.patch('/:parent/:slug', async (ctx, next) => {
   let err
-
-  const { slug } = ctx.params
-  let article = await findArticleBySlug(slug)
+  let article = await retrieveArticle(ctx)
   if (!article) {
     ctx.throw(404)
     return
@@ -76,13 +79,12 @@ router.patch('/:slug*', async (ctx, next) => {
   }
 
   await storeArticle(article)
-  ctx.body = await findArticleBySlug(article.getSlug())
+  ctx.body = await findArticleByRelative(article.getRelative())
 })
 
-router.delete('/:slug*', async (ctx, next) => {
+router.delete('/:parent/:slug', async (ctx, next) => {
   let err
-  const article = await findArticleBySlug(ctx.params.slug)
-
+  const article = await retrieveArticle(ctx)
   if (!article) {
     ctx.throw(404)
     return

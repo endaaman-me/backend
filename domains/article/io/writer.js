@@ -5,11 +5,11 @@ const { ResumableError } = require('../../../helper')
 const { ARTICLES_DIR } = require('../../../config')
 
 
-function getArticlePath(slug) {
-  if (!slug) {
+function convertRelativeToAbs(relative) {
+  if (!relative) {
     return null
   }
-  return pa.join(ARTICLES_DIR, slug + '.md')
+  return pa.join(ARTICLES_DIR, relative + '.md')
 }
 
 
@@ -29,8 +29,8 @@ async function removeDirIfEmpty(path) {
 }
 
 async function write(article) {
-  const newPath = getArticlePath(article.getSlug())
-  const oldPath = getArticlePath(article.getOldSlug())
+  const newPath = convertRelativeToAbs(article.getRelative())
+  const oldPath = convertRelativeToAbs(article.getOldRelative())
 
   if (article.isNewely()) {
     // newly create
@@ -51,9 +51,9 @@ async function write(article) {
         return
       }
       await fs.move(oldPath, newPath)
-      const oldCategorySlug = article.getOldCategorySlug()
-      if (oldCategorySlug) {
-        await removeDirIfEmpty(pa.join(ARTICLES_DIR, oldCategorySlug))
+      const oldParent = article.getOldParent()
+      if (oldParent) {
+        await removeDirIfEmpty(pa.join(ARTICLES_DIR, oldParent))
       }
     }
   }
@@ -65,20 +65,20 @@ async function write(article) {
   article.bless(stat.birthtime, stat.mtime)
 }
 
-async function removeBySlug(slug) {
-  const path = getArticlePath(slug)
+async function remove(article) {
+  const path = convertRelativeToAbs(article.getRelative())
   if (!fs.existsSync(path)) {
     throw new ResumableError(`can not unlink \`${path}\``)
     return
   }
   await fs.unlink(path)
-
-  const splitted = slug.split('/')
-  const categorySlug = splitted[0]
-  await removeDirIfEmpty(pa.join(ARTICLES_DIR, categorySlug))
+  const parent = article.getParent()
+  if (parent) {
+    await removeDirIfEmpty(pa.join(ARTICLES_DIR, parent))
+  }
 }
 
 module.exports = {
   write,
-  removeBySlug,
+  remove,
 }

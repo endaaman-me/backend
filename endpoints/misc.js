@@ -13,4 +13,8 @@ router.get('/cache', async (ctx, next) => {
   ctx.body = getCacheData()
 })
 
+router.post('/echo', async (ctx, next) => {
+  ctx.body = ctx.request.body
+})
+
 module.exports = router

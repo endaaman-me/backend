@@ -78,14 +78,13 @@ function parseMetaText(metaText) {
   }
 }
 
-async function readOne(relative) {
+async function readOne(filename, parent) {
   let err
-  const filepath = J(ARTICLES_DIR, relative)
-  const splitted = relative.split('/')
-  const slug = trimExtension(relative)
+  const path = J(ARTICLES_DIR, parent ? J(parent, filename) : filename)
+  const slug = trimExtension(filename)
 
-  const stat = await fs.stat(filepath)
-  const wholeText = await fs.readFile(filepath, 'utf-8')
+  const stat = await fs.stat(path)
+  const wholeText = await fs.readFile(path, 'utf-8')
   const {
     metaText,
     contentText,
@@ -100,6 +99,7 @@ async function readOne(relative) {
 
   const base =  {
     slug,
+    parent,
     content: contentText,
     date: fecha.format(stat.birthtime, 'YYYY-MM-DD'),
   }
@@ -123,7 +123,7 @@ async function readOne(relative) {
 async function readAll() {
   const baseFilenames = await fs.readdir(ARTICLES_DIR)
 
-  const categortSlugs = (await Promise.all(baseFilenames.map(slug => {
+  const parents = (await Promise.all(baseFilenames.map(slug => {
     return fs.stat(J(ARTICLES_DIR, slug)).then((stat) => ({stat, slug}))
   })))
     .filter((v) => v.stat.isDirectory())
@@ -134,10 +134,10 @@ async function readAll() {
     wg.push(readOne(v, null))
   }
 
-  for (const categorySlug of categortSlugs) {
-    const filenames = (await fs.readdir(J(ARTICLES_DIR, categorySlug))).filter(isMd)
+  for (const parent of parents) {
+    const filenames = (await fs.readdir(J(ARTICLES_DIR, parent))).filter(isMd)
     for (const name of filenames) {
-      wg.push(readOne(J(categorySlug, name)))
+      wg.push(readOne(name, parent))
     }
   }
   const results = await Promise.all(wg)
