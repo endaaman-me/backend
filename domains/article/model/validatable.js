@@ -1,5 +1,4 @@
 const Joi = require('joi')
-const { Visiblity } = require('../constant')
 
 
 // const REG_SLUG = /^(?:[a-z0-9-_]+|(?:[a-z0-9-_]+\/[a-z0-9-_]+))$/
@@ -12,14 +11,15 @@ const ValidatableImpl = {
     const { error } = Joi.validate(this.data, Joi.object({
       slug      : Joi.string().regex(REG_SLUG).required(),
       parent    : Joi.string().regex(REG_SLUG).allow(null),
-      content   : Joi.string().allow('').required(),
+      content   : Joi.string().allow(''),
       aliases   : Joi.array().items(Joi.string()),
-      title     : Joi.string(),
+      title     : Joi.string().allow(''),
       digest    : Joi.string().allow(''),
+      private   : Joi.boolean(),
+      special   : Joi.boolean(),
       image     : Joi.string().allow(''),
       tags      : Joi.array().items(Joi.string().regex(/^\S+$/)),
       priority  : Joi.number().min(0).integer(),
-      visiblity : Joi.string().allow(Object.values(Visiblity)),
       date      : Joi.string().regex(REG_DATE).required(),
     }))
     return error

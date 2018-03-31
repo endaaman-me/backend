@@ -21,7 +21,18 @@ const META_FIELDS = [
     key: 'image',
   }, {
     key: 'tags',
-    fill: (v) => v && v.length,
+    fill: (v) => v && v.length > 0,
+    morph(tags) {
+      const tt = [...tags]
+      tt.sort((a, b) => a.localeCompare(b))
+      return tt
+    },
+  }, {
+    key: 'private',
+    fill: (v) => v,
+  }, {
+    key: 'special',
+    fill: (v) => v,
   }, {
     key: 'priority',
   }, {
@@ -44,7 +55,9 @@ const SerializableImpl = {
     for (const field of META_FIELDS) {
       const fill = field.fill || defaultFillFunc
       if (fill(this.data[field.key], this)) {
-        meta[field.key] = this.data[field.key]
+          meta[field.key] = field.morph
+            ? field.morph(this.data[field.key])
+            : this.data[field.key]
         hasMetaField = true
       }
     }

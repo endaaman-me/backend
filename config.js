@@ -1,39 +1,24 @@
 const pa = require('path')
 const bcrypt = require('bcrypt')
-const dotenv = require('dotenv')
 
-dotenv.config()
+const SHARED_DIR = pa.resolve(process.env.SHARED_DIR)
 
-if (!process.env.ENDAAMAN_SECRET_KEY_BAE) {
-  throw new Error('You need to setup .env')
-  return
-}
-
-const PASSWORD_HASH = process.env.ENDAAMAN_PASSWORD_HASH
-const SECRET_KEY_BASE = process.env.ENDAAMAN_SECRET_KEY_BAE
-
-const SHARED_DIR = pa.resolve(process.env.ENDAAMAN_SHARED_DIR)
-const ARTICLES_DIR = pa.join(SHARED_DIR, 'articles')
-const PRIVATE_DIR = pa.join(SHARED_DIR, 'private')
-const PROTECTED_DIR_NAMES = ['articles', 'private']
-
-
-const META_DELIMITTER = '---'
-const META_FILENAME = '.meta.json'
-const WARNING_FILE_NAME = '.warning.json'
-const CACHE_IGONRED_FILES = [WARNING_FILE_NAME]
-
-module.exports = {
-  PASSWORD_HASH,
-  SECRET_KEY_BASE,
-
+const config = {
+  IS_PROD           : process.env.NODE_ENV === 'production',
+  SECRET_KEY_BASE   : process.env.SECRET_KEY_BASE,
+  PASSWORD_HASH     : process.env.PASSWORD_HASH,
   SHARED_DIR,
-  PRIVATE_DIR,
-  ARTICLES_DIR,
-  PROTECTED_DIR_NAMES,
-
-  META_DELIMITTER,
-  META_FILENAME,
-  WARNING_FILE_NAME,
-  CACHE_IGONRED_FILES,
+  PRIVATE_DIR       : pa.join(SHARED_DIR, 'private'),
+  ARTICLES_DIR      : pa.join(SHARED_DIR, 'articles'),
+  META_DELIMITTER   : '---',
+  META_FILENAME     : '.meta.json',
+  WARNING_FILE_NAME : '.warning.json',
 }
+
+for (const k in config) {
+  if (config[k] == null) {
+    throw new Error(`App could not be started because ${ k } is not define.`)
+  }
+}
+
+module.exports = config

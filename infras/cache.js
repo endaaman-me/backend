@@ -1,8 +1,9 @@
 const pa = require('path')
 const fs = require('fs-extra')
-const { CACHE_IGONRED_FILES, ARTICLES_DIR }  = require('../config')
+const { WARNING_FILE_NAME, ARTICLES_DIR }  = require('../config')
 
 
+const CACHE_IGONRED_FILES = [WARNING_FILE_NAME]
 let CACHE_DATA = {}
 let CACHE_REVISIONS = {}
 

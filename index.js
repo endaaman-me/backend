@@ -13,7 +13,7 @@ const tokenByHeaderMiddleware = require('./middlewares/token-by-header')
 const tokenByCookieMiddleware = require('./middlewares/token-by-cookie')
 const loggerMiddleware = require('./middlewares/logger')
 const authMiddleware = require('./middlewares/auth')
-const authStaticMiddleware = require('./middlewares/auth-static')
+const staticMiddleware = require('./middlewares/static')
 const apiRouter = require('./endpoints')
 
 
@@ -42,8 +42,13 @@ staticApp.context.token = null
 staticApp.context.authorized = false
 staticApp
   .use(bootstrapMiddleware)
+  .use(koaCors({
+    origin: ['*'],
+    allowMethods: ['GET'],
+    allowHeaders: ['Content-Type', 'Accept', 'Set-Cookie'],
+  }))
   .use(tokenByCookieMiddleware)
   .use(authMiddleware)
-  .use(authStaticMiddleware)
-  .use(koaServe(config.SHARED_DIR))
+  .use(staticMiddleware)
+  // .use(koaServe(config.SHARED_DIR))
   .listen(3002)

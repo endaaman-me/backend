@@ -9,12 +9,12 @@ const J = pa.join.bind(pa)
 
 async function checkDir(dir) {
   if (!fs.existsSync(dir)) {
-    throw new ResumableError(`${dir} is not exist`)
+    throw new ResumableError(`${dir} does not exist`)
   }
 
   const dirStat = await fs.stat(dir)
   if (!dirStat.isDirectory()) {
-    throw new ResumableError(`${dir} is not directory`)
+    throw new ResumableError(`${dir} does not directory`)
   }
 }
 
@@ -30,14 +30,14 @@ async function listDir(dirSlug) {
       name,
       size: stat.size,
       mtime: stat.mtime,
-      is_dir: stat.isDirectory(),
+      isDir: stat.isDirectory(),
     }
     results.push(data)
   }
 
   results.sort((a, b) => {
-    if (a.is_dir ^ b.is_dir) {
-      return a.is_dir ? -1 : 1
+    if (a.isDir ^ b.isDir) {
+      return a.isDir ? -1 : 1
     }
     return a.name.localeCompare(b.name)
   })
@@ -70,7 +70,7 @@ async function saveFiles(dirSlug, files) {
 async function deleteFile(slug) {
   const path = J(SHARED_DIR, slug)
   if (!fs.existsSync(path)) {
-    throw new ResumableError(`${path} does not exist`)
+    throw new ResumableError(`${slug} does not exist`)
   }
 
   const stat = await fs.stat(path)
@@ -82,27 +82,40 @@ async function deleteFile(slug) {
   if (stat.isDirectory()) {
     const files = await fs.readdir(path)
     if (files.length > 0) {
-      throw new ResumableError(`${path} is not empty directory`);
+      throw new ResumableError(`${slug} is not empty directory`);
     }
     await fs.rmdir(path)
     return
   }
 
-  throw new ResumableError(`${path} is not file nor directory`);
+  throw new ResumableError(`${slug} is not file nor directory`);
 }
 
 async function moveFile(slug, destSlug) {
   const path = J(SHARED_DIR, slug)
   if (!fs.existsSync(path)) {
-    throw new ResumableError(`${path} does not exist`)
+    throw new ResumableError(`${slug} does not exist`)
   }
 
   const destPath = J(SHARED_DIR, destSlug)
   if (fs.existsSync(destPath)) {
-    throw new ResumableError(`dest path(${destPath}) already exists`)
+    throw new ResumableError(`dest path(${destSlug}) already exists`)
   }
-  await checkDir(destPath)
+  const destDir = pa.dirname(destPath)
+  await checkDir(destDir)
   await fs.rename(path, destPath)
+}
+
+async function makeDir(slug) {
+  const path = J(SHARED_DIR, slug)
+  if (fs.existsSync(path)) {
+    const stat = await fs.stat(path)
+    if (stat.isDirectory()) {
+      return
+    }
+    throw new ResumableError(`${path} already exists`)
+  }
+  await fs.mkdir(path)
 }
 
 
@@ -111,4 +124,5 @@ module.exports = {
   saveFiles,
   deleteFile,
   moveFile,
+  makeDir,
 }

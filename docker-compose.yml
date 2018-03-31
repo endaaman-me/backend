@@ -1,0 +1,10 @@
+endaaman-backend:
+  build: .
+  environment:
+    VIRTUAL_HOST: api.endaaman.me,static.endaaman.me,api.endaaman.dev,static.endaaman.dev
+    SHARED_DIR: '/var/shared'
+    PASSWORD_HASH: ${PASSWORD_HASH}
+    SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    HTTPS_METHOD: 'noredirect'
+  volumes:
+    - /var/shared:/var/shared

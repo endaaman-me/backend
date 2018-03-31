@@ -5,7 +5,7 @@ const { getCacheData } = require('../infras/cache')
 
 const router = new Router()
 
-router.get('/warning', async (ctx, next) => {
+router.get('/warnings', async (ctx, next) => {
   ctx.body = await getAllWarning()
 })
 

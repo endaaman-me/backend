@@ -6,7 +6,6 @@ const yaml = require('js-yaml')
 
 const { SerializableImpl } = require('./serializable')
 const { ValidatableImpl } = require('./validatable')
-const { Visiblity } = require('../constant')
 
 function toRelative(parent, slug) {
   return parent ? `${parent}/${slug}` : slug
@@ -15,7 +14,7 @@ function toRelative(parent, slug) {
 
 class Article {
   isPublic() {
-    return this.data.visiblity !== Visiblity.PRIVATE
+    return !this.data.private
   }
   isNewely() {
     return this._.isNewely
@@ -48,7 +47,8 @@ class Article {
       digest: '',
       tags: [],
       priority: 0,
-      visiblity: Visiblity.DEFAULT,
+      private: false,
+      special: false,
       date: fecha.format((new Date()), 'YYYY-MM-DD'),
       ...data,
     }

@@ -1,5 +1,6 @@
 const Router = require('koa-router')
 const Joi = require('joi')
+const protected = require('../middlewares/protected')
 const config = require('../config')
 const {
   Article,
@@ -17,7 +18,6 @@ async function retrieveArticle(ctx) {
   const relative = parent === '-' ? slug : `${parent}/${slug}`
   return await findArticleByRelative(relative)
 }
-
 
 function combineFilters(filters) {
   return function(a) {
@@ -49,7 +49,7 @@ router.get('/:parent/:slug', async (ctx, next) => {
   ctx.status = a ? 200 : 404
 })
 
-router.post('/', async (ctx, next) => {
+router.post('/', protected, async (ctx, next) => {
   let err
   const article = new Article(ctx.request.body)
   err = article.validate()
@@ -63,7 +63,7 @@ router.post('/', async (ctx, next) => {
   ctx.status = 201
 })
 
-router.patch('/:parent/:slug', async (ctx, next) => {
+router.patch('/:parent/:slug', protected, async (ctx, next) => {
   let err
   let article = await retrieveArticle(ctx)
   if (!article) {
@@ -82,7 +82,7 @@ router.patch('/:parent/:slug', async (ctx, next) => {
   ctx.body = await findArticleByRelative(article.getRelative())
 })
 
-router.delete('/:parent/:slug', async (ctx, next) => {
+router.delete('/:parent/:slug', protected, async (ctx, next) => {
   let err
   const article = await retrieveArticle(ctx)
   if (!article) {

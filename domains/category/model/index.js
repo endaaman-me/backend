@@ -41,12 +41,12 @@ class Category {
     this._.isNewely = false
   }
 
-  compare(a) {
-    const diff = this.data.priority - a.data.priority
+  compare(that) {
+    const diff = that.data.priority - this.data.priority
     if (diff !== 0) {
       return diff
     }
-    return this.data.name.localeCompare(a.data.name)
+    return that.data.name.localeCompare(that.data.name)
   }
 
   toJSON() {
