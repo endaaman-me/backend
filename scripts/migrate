@@ -1,0 +1,57 @@
+#!/usr/bin/env node
+
+const axios = require('axios')
+const fecha = require('fecha')
+const fs = require('fs-extra')
+
+const {
+  Article,
+  storeArticle,
+} = require('../domains/article')
+
+
+async function fetchOlds() {
+  const { data: { token } } = await axios.post('https://api.endaaman.me/session', {
+    username: process.env.PROD_USER,
+    password: process.env.PROD_PASSWORD,
+  })
+
+  const { data } = await axios.get('https://api.endaaman.me/memos', {
+    headers: {
+      'Authorization': 'Bearer ' + token
+    }
+  })
+  return data
+}
+
+async function main() {
+  const olds = await fetchOlds()
+  fs.outputFile('old_articles.json', JSON.stringify(olds, null, 2))
+  return
+  const migratingArticles = []
+  for (const o of olds) {
+    const a = new Article({
+      slug: o.slug,
+      title: o.title,
+      content: o.content,
+      digest: o.digest,
+      private: o.hidden || o.draft,
+      image: o.image_url,
+      date: fecha.format(new Date(o.updated_at), 'YYYY-MM-DD'),
+      aliases: [ o.hex ]
+    })
+    const err = a.validate()
+    if (err) {
+      throw new Error(err)
+      return
+    }
+    migratingArticles.push(a)
+  }
+
+  for (const a of migratingArticles) {
+    await storeArticle(a)
+  }
+  console.log('done')
+}
+
+main()

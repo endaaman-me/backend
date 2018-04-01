@@ -20,12 +20,11 @@ RUN \
 
 COPY package*.json /tmp/
 RUN cd /tmp && npm --production=false install
+RUN cp -a /tmp/node_modules ./
 
 COPY nginx/api.conf /etc/nginx/sites-enabled
 COPY nginx/static.conf /etc/nginx/sites-enabled/
 COPY supervisor.conf /etc/supervisor/conf.d/
-
-RUN cp -a /tmp/node_modules ./
 
 COPY . ./
 

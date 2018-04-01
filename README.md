@@ -1,3 +1,9 @@
+# [api.endaaman.me](https://api.endaaman.me)
+
+This project contains https://static.endaaman.me
+
+See also [endaaman/api.endaaman.me](https://github.com/endaaman/api.endaaman.me)
+
 ## envs
 
 - `NODE_ENV`
@@ -11,7 +17,7 @@
 - file
   - put file
   - file permission
-  - owner user 
+  - owner user
 
 ### passive
 
