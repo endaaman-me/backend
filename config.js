@@ -1,7 +1,7 @@
 const pa = require('path')
 const bcrypt = require('bcrypt')
 
-const SHARED_DIR = pa.resolve(process.env.SHARED_DIR)
+const SHARED_DIR = pa.resolve(process.env.SHARED_DIR || 'shared')
 
 const config = {
   IS_PROD           : process.env.NODE_ENV === 'production',
