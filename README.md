@@ -13,6 +13,7 @@ See also [endaaman/api.endaaman.me](https://github.com/endaaman/api.endaaman.me)
 
 ## TODOs
 
+- lock for caching
 - auth apis
 - file
   - put file

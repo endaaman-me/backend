@@ -5,6 +5,9 @@ all: dev
 dev:
 	npm run watch
 
+start: build
+	docker-compose up --build
+
 build:
 	docker build . -t endaaman/api.endaaman.me
 
@@ -13,6 +16,3 @@ push: build
 
 pull:
 	docker pull endaaman/api.endaaman.me
-
-start: build
-	docker-compose up --build
