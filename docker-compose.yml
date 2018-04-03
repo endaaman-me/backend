@@ -2,8 +2,7 @@ endaaman-backend:
   build: .
   environment:
     - VIRTUAL_HOST=api.endaaman.test,static.endaaman.test
-    - SHARED_DIR=/var/shared
     - PASSWORD_HASH
     - SECRET_KEY_BASE
   volumes:
-    - /var/shared:/var/shared
+    - endaaman-data:/var/www/data

@@ -13,6 +13,8 @@ See also [endaaman/api.endaaman.me](https://github.com/endaaman/api.endaaman.me)
 
 ## TODOs
 
+- use `www-data:33:33`
+  - `sudo -u http npm start`
 - lock for caching
 - auth apis
 - file
