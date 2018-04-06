@@ -14,10 +14,9 @@ RUN \
   echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
   rm /etc/nginx/sites-enabled/default
 
-RUN mkdir -p /var/www/shared
-RUN chmod -R 2770 /var/www/shared
+RUN mkdir -p /var/www/data
+RUN chmod 2775 /var/www/data
 RUN chown -R www-data:www-data /var/www/
-# RUN sudo -u www-data umask 0002
 
 COPY package*.json /tmp/
 RUN cd /tmp && npm --production=false install
@@ -28,8 +27,8 @@ COPY nginx/static.conf /etc/nginx/sites-enabled/
 COPY supervisor.conf /etc/supervisor/conf.d/
 
 COPY . ./
-RUN chown -R www-data:www-data ./
-VOLUME /var/www/shared
+# RUN chown -R www-data:www-data ./
 
+VOLUME /var/www/data
 EXPOSE 80 443
 CMD ["/usr/bin/supervisord"]

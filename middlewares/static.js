@@ -15,7 +15,6 @@ const PROTECTED_DIR_NAMES = ['articles', 'private']
 module.exports = async (ctx, next) => {
   const goNext = async () => {
     if (config.IS_PROD) {
-      console.log('ser')
       await proxy(ctx, next)
     } else {
       await serve(ctx, next)

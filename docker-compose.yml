@@ -5,4 +5,4 @@ endaaman-backend:
     - PASSWORD_HASH
     - SECRET_KEY_BASE
   volumes:
-    - /var/www/endaaman:/var/www/shared
+    - endaaman-data:/var/www/data
